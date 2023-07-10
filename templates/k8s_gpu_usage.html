@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>K8S GPU Usage</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-5.3.0-dist/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+
+    <!-- jsPanel CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='jspanel-dist/jspanel.css') }}"/>
+
+</head>
+<body>
+
+
+<!-- Optional JavaScript -->
+<!-- jsPanel first, then then Bootstrap JS -->
+<script src="{{ url_for('static', filename='jspanel-dist/jspanel.js') }}"></script>
+<script src="{{ url_for('static', filename='bootstrap-5.3.0-dist/js/bootstrap.bundle.min.js') }}"></script>
+
+<h1>Available NVIDIA GPUs in the cluster</h1>
+
+<table class="table table-bordered">
+	<thead>
+		<tr class="table-active">
+			<th>Node</th>
+			<th>Capacity (GPUs)</th>
+			<th>Allocatable (GPUs)</th>
+			<th>Allocated (GPUs)</th>
+		</tr>
+	</thead>
+	<tbody>
+	{% for k8s_node_descr in k8s_node_descr_list %}
+		<tr>
+			<th>{{ k8s_node_descr.name }}</th>
+			<th>{{ k8s_node_descr.capacity.get('nvidia.com/gpu', '0') }}</th>
+			<th>{{ k8s_node_descr.allocatable.get('nvidia.com/gpu', '0') }}</th>
+			<th>{{ k8s_node_descr.allocated.get('nvidia.com/gpu', {'limits': '0'}).limits }}</th>
+		</tr>
+	{% endfor %}
+	</tbody>
+</table>
+
+<h1>Running pods that use NVIDIA GPUs</h1>
+
+<table class="table table-bordered">
+	<thead>
+		<tr class="table-active">
+			<th>Namespace</th>
+			<th>Pod name</th>
+			<th>Used NVIDIA GPU(s)</th>
+		</tr>
+	</thead>
+	<tbody>
+	{% for k8s_pod_info in k8s_pod_info_list %}
+		<tr>
+			<th>{{ k8s_pod_info.namespace }}</th>
+			<th>{{ k8s_pod_info.name }}</th>
+			<th>{{ k8s_pod_info.used_nvidia_gpus }}</th>
+		</tr>
+	{% endfor %}
+	</tbody>
+</table>
+
+
+<div>
+	<b>Generated at the time: {{ now | datetime_format }}</b>
+</div>
+
+</body>
+</html>

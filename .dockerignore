@@ -1,0 +1,15 @@
+Dockerfile*
+
+# Git repository metadata
+.git
+**/.gitignore
+
+# Backup files
+**/*~
+
+/venv
+/k8s-config
+/.idea
+docker-run.sh
+docker-build.sh
+docker-config.sh
