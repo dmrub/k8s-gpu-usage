@@ -13,3 +13,4 @@ Dockerfile*
 docker-run.sh
 docker-build.sh
 docker-config.sh
+/screenshot.jpg

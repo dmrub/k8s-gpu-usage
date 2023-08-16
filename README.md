@@ -59,6 +59,15 @@ kubectl port-forward svc/k8s-gpu-usage 8080:80
 ```
 Open in browser http://localhost:8080
 
+You should see a web page like the one in the following figure:
+![Screenshot](screenshot.jpg)
+
+## Running in Rancher Kubernetes UI
+
+If you are using Rancher Kubernetes UI, you can use the Dashboard UI plugin for this application:
+
+https://github.com/dmrub/rancher-gpu-usage-ui-plugin
+
 ## License
 
 Copyright 2023 Dmitri Rubinstein
