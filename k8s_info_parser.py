@@ -60,7 +60,7 @@ class K8sPodInfo:
     name: str
     namespace: str
     node_name: str
-    used_nvidia_gpus: str
+    used_nvidia_gpus: int
 
 
 K8S_ALLOCATED_RESOURCES = 'Allocated resources:'
@@ -153,8 +153,12 @@ def k8s_parse_pod_info(text):
         if not tokens:
             continue
         if len(tokens) >= 3:
+            try:
+                used_nvidia_gpus = int(tokens[3] if len(tokens) > 3 else '0')
+            except ValueError:
+                used_nvidia_gpus = 0
             pod_infos.append(
-                K8sPodInfo(name=tokens[1], namespace=tokens[0], node_name=tokens[2], used_nvidia_gpus=tokens[3] if len(tokens) > 3 else '0'))
+                K8sPodInfo(name=tokens[1], namespace=tokens[0], node_name=tokens[2], used_nvidia_gpus=used_nvidia_gpus))
     return pod_infos
 
 

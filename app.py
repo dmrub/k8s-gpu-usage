@@ -162,7 +162,7 @@ def k8s_get_info():
             LOGGER.info("File %s created", k8s_pod_info_path)
 
     k8s_node_descr_list = k8s_parse_node_description(k8s_node_description_text)
-    k8s_pod_info_list = k8s_parse_pod_info(k8s_pod_info_text)
+    k8s_pod_info_list = [pi for pi in k8s_parse_pod_info(k8s_pod_info_text) if pi.used_nvidia_gpus > 0]
 
     return k8s_node_descr_list, k8s_pod_info_list
 
