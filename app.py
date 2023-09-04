@@ -126,10 +126,11 @@ def k8s_get_info():
         LOGGER.info("Loaded file %s", k8s_pod_info_path)
     else:
         go_template = (
-            r'{{range .items}}{{if (eq .status.phase "Running")}}{{$pns:=.metadata.namespace}}{{'
-            r"$pname:=.metadata.name}}{{range .spec.containers}}{{ with .resources.requests }}{{$gpus:=("
-            r'index . "nvidia.com/gpu")}}{{if $gpus}}{{$pns}}{{","}}{{$pname}}{{","}}{{$gpus}}{{"\n"}}{{'
-            r"end}}{{end}}{{end}}{{end}}{{end}} "
+            r'{{range .items}}{{if (eq .status.phase "Running")}}{{$pns:=.metadata.namespace}}'
+            r"{{$pname:=.metadata.name}}{{$pnode:=.spec.nodeName}}{{range .spec.containers}}"
+            r'{{ with .resources.requests }}{{$gpus:=(index . "nvidia.com/gpu")}}'
+            r'{{if $gpus}}{{$pns}}{{","}}{{$pname}}{{","}}{{$pnode}}{{","}}{{$gpus}}{{"\n"}}'
+            r"{{end}}{{end}}{{end}}{{end}}{{end}} "
         )
         cmdargs = [
             app.config["KUBECTL"],

@@ -24,11 +24,14 @@ class K8sNodeDescr:
         self.allocatable = {}
         self.allocated = {}
 
+
 @dataclass
 class K8sPodInfo:
     name: str
     namespace: str
+    node_name: str
     used_nvidia_gpus: str
+
 
 K8S_ALLOCATED_RESOURCES = 'Allocated resources:'
 K8S_SYSTEM_INFO = 'System Info:'
@@ -85,6 +88,7 @@ def k8s_parse_node_description(text):
         descr_list.append(cur_descr)
     return descr_list
 
+
 def k8s_parse_pod_info(text):
     pod_infos: List[K8sPodInfo] = []
     for line in text.splitlines():
@@ -94,9 +98,11 @@ def k8s_parse_pod_info(text):
         tokens = line_s.split(',')
         if not tokens:
             continue
-        if len(tokens) >= 2:
-            pod_infos.append(K8sPodInfo(name=tokens[1], namespace=tokens[0], used_nvidia_gpus=tokens[2] if len(tokens) > 2 else '0'))
+        if len(tokens) >= 3:
+            pod_infos.append(
+                K8sPodInfo(name=tokens[1], namespace=tokens[0], node_name=tokens[2], used_nvidia_gpus=tokens[3] if len(tokens) > 3 else '0'))
     return pod_infos
+
 
 if __name__ == '__main__':
 

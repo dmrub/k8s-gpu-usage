@@ -53,6 +53,7 @@
 		<tr class="table-active">
 			<th>Namespace</th>
 			<th>Pod name</th>
+			<th>Node name</th>
 			<th>Used NVIDIA GPU(s)</th>
 		</tr>
 	</thead>
@@ -61,6 +62,7 @@
 		<tr>
 			<th>{{ k8s_pod_info.namespace }}</th>
 			<th>{{ k8s_pod_info.name }}</th>
+			<th>{{ k8s_pod_info.node_name }}</th>
 			<th>{{ k8s_pod_info.used_nvidia_gpus }}</th>
 		</tr>
 	{% endfor %}
