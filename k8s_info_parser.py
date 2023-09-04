@@ -17,12 +17,42 @@ class K8sNodeDescr:
     capacity: Dict[str, str]
     allocatable: Dict[str, str]
     allocated: Dict[str, K8sAllocatedResource]
+    labels: Dict[str, str]
 
     def __init__(self, name: str):
         self.name = name
         self.capacity = {}
         self.allocatable = {}
         self.allocated = {}
+        self.labels = {}
+
+    @property
+    def capacity_nvidia_gpu(self):
+        try:
+            return int(self.capacity.get('nvidia.com/gpu', '0'))
+        except ValueError:
+            return 0
+
+    @property
+    def allocatable_nvidia_gpu(self) -> int:
+        try:
+            return int(self.allocatable.get('nvidia.com/gpu', '0'))
+        except ValueError:
+            return 0
+
+    @property
+    def allocated_nvidia_gpu(self) -> int:
+        try:
+            allocated_resource = self.allocated.get('nvidia.com/gpu', None)
+            if isinstance(allocated_resource, K8sAllocatedResource):
+                return int(allocated_resource.limits)
+            return 0
+        except ValueError:
+            return 0
+
+    @property
+    def available_nvidia_gpu(self) -> int:
+        return self.allocatable_nvidia_gpu - self.allocated_nvidia_gpu
 
 
 @dataclass
@@ -39,7 +69,17 @@ K8S_ALLOCATABLE = 'Allocatable:'
 K8S_CAPACITY = 'Capacity:'
 K8S_EVENTS = 'Events:'
 K8S_NAME = 'Name:'
+K8S_LABELS = 'Labels:'
+K8S_ANNOTATIONS = 'Annotations:'
 
+def str_after_keyword(s: str, keyword: str) -> Optional[str]:
+    pos = s.find(keyword)
+    if pos <= 0:
+        return None
+    if pos > 0:
+        if not s[pos-1].isspace():
+            return None
+    return s[pos+len(keyword):]
 
 def k8s_parse_node_description(text):
     cur_descr: Optional[K8sNodeDescr] = None
@@ -65,12 +105,26 @@ def k8s_parse_node_description(text):
             mode = cur_token
         elif cur_token == K8S_ALLOCATABLE:
             mode = cur_token
+        elif cur_token == K8S_LABELS:
+            mode = cur_token
+            key_value_str = str_after_keyword(line_s, K8S_LABELS)
+            if key_value_str is not None:
+                key_value = key_value_str.strip().split('=', maxsplit=1)
+                cur_descr.labels.clear()
+                if len(key_value) == 2:
+                    cur_descr.labels[key_value[0]] = key_value[1]
+        elif cur_token == K8S_ANNOTATIONS:
+            mode = None # End of labels
         elif (line_s.startswith(K8S_SYSTEM_INFO) and len(tokens) == 2) or cur_token == K8S_EVENTS:
             mode = None
         elif line_s.startswith(K8S_ALLOCATED_RESOURCES) and len(tokens) == 2:
             mode = K8S_ALLOCATED_RESOURCES
         else:
-            if (mode == K8S_CAPACITY or mode == K8S_ALLOCATABLE) and len(tokens) >= 2 and len(tokens[0]) >= 2:
+            if mode == K8S_LABELS:
+                key_value = line_s.split('=', maxsplit=1)
+                if len(key_value) == 2:
+                    cur_descr.labels[key_value[0]] = key_value[1]
+            elif (mode == K8S_CAPACITY or mode == K8S_ALLOCATABLE) and len(tokens) >= 2 and len(tokens[0]) >= 2:
                 key = tokens[0][:-1]  # remove last ':'
                 value = tokens[1]
                 if mode == K8S_CAPACITY:
@@ -134,6 +188,9 @@ if __name__ == '__main__':
         print('---')
         print('Allocated:')
         pprint_dict(descr.allocated)
+        print('---')
+        print('Labels:')
+        pprint_dict(descr.labels)
         print('---')
 
     for pod_info in pod_info_list:

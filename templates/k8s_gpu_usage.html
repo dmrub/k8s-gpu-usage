@@ -29,18 +29,22 @@
 	<thead>
 		<tr class="table-active">
 			<th>Node</th>
+			<th>GPU Product</th>
 			<th>Capacity (GPUs)</th>
 			<th>Allocatable (GPUs)</th>
 			<th>Allocated (GPUs)</th>
+			<th>Available (GPUs)</th>
 		</tr>
 	</thead>
 	<tbody>
 	{% for k8s_node_descr in k8s_node_descr_list %}
 		<tr>
 			<th>{{ k8s_node_descr.name }}</th>
-			<th>{{ k8s_node_descr.capacity.get('nvidia.com/gpu', '0') }}</th>
-			<th>{{ k8s_node_descr.allocatable.get('nvidia.com/gpu', '0') }}</th>
-			<th>{{ k8s_node_descr.allocated.get('nvidia.com/gpu', {'limits': '0'}).limits }}</th>
+			<th>{{ k8s_node_descr.labels.get('nvidia.com/gpu.product', '') }}</th>
+			<th>{{ k8s_node_descr.capacity_nvidia_gpu }}</th>
+			<th>{{ k8s_node_descr.allocatable_nvidia_gpu }}</th>
+			<th>{{ k8s_node_descr.allocated_nvidia_gpu }}</th>
+			<th>{{ k8s_node_descr.available_nvidia_gpu }}</th>
 		</tr>
 	{% endfor %}
 	</tbody>
